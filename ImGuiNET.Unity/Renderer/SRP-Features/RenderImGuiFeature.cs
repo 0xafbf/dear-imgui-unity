@@ -1,7 +1,12 @@
 ﻿using UnityEngine.Rendering;
+using UnityEngine;
 
 #if HAS_URP
 using UnityEngine.Rendering.Universal;
+#endif
+
+#if UNITY_EDITOR
+using UnityEditor;
 #endif
 
 #if HAS_URP
@@ -15,7 +20,17 @@ namespace ImGuiNET.Unity
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+#if UNITY_EDITOR
+                var sceneView = SceneView.currentDrawingSceneView;
+                if (sceneView != null) return;
+#endif
+                ref CameraData cameraData = ref renderingData.cameraData;
+                Matrix4x4 viewMatrix = cameraData.GetViewMatrix();
+                Matrix4x4 projectionMatrix = cameraData.GetProjectionMatrix();
+
+                cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
                 context.ExecuteCommandBuffer(cmd);
+
             }
         }
 
